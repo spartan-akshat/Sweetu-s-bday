@@ -167,7 +167,7 @@
         };
 
         // Timer
-        const bday = new Date("Dec 31, 2024 00:00:00").getTime();
+        const bday = new Date("Jan 4, 2026 00:00:00").getTime();
         const countdown = setInterval(() => {
             const diff = bday - new Date().getTime();
             document.getElementById("days").innerText = Math.floor(diff/86400000);
