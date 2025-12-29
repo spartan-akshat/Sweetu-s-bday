@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sweetu's Bday</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --pink: #ff6b6b; --creme: #fffdf5; }
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0; font-family: 'Poppins', sans-serif; color: white;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('background.jpg');
+            background-size: cover; background-position: center; background-attachment: fixed;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        /* Hearts Sidebar */
+        .hearts-sidebar { position: fixed; left: 10px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: space-around; z-index: 5; pointer-events: none; }
+        .hearts-sidebar span { font-size: 20px; animation: pulse 1.5s infinite; }
+
+        /* Section Control */
+        .section { display: none; width: 90%; max-width: 500px; text-align: center; padding: 40px 10px; margin-top: 20px; }
+        .active { display: flex; flex-direction: column; align-items: center; animation: fadeIn 0.8s ease; }
+
+        .card { background: var(--creme); color: #333; padding: 30px; border-radius: 20px; border: 8px double var(--pink); box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; }
+
+        /* Timer */
+        #timer { display: flex; gap: 8px; margin-top: 20px; justify-content: center; }
+        .t-box { background: rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; min-width: 60px; border: 1px solid rgba(255,255,255,0.3); }
+        .t-box span { display: block; font-size: 1.5rem; font-weight: bold; color: white; }
+
+        /* Cake */
+        .cake-wrap { position: relative; width: 180px; height: 160px; margin: 30px auto; cursor: pointer; }
+        .tier { position: absolute; left: 50%; transform: translateX(-50%); background: #f497ba; border-radius: 10px 10px 0 0; }
+        .t1 { bottom: 0; width: 180px; height: 65px; border-bottom: 5px solid #e07da2; }
+        .t2 { bottom: 65px; width: 110px; height: 45px; background: #ffb7d5; }
+        .flame { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 12px; height: 18px; background: orange; border-radius: 50%; animation: flicker 0.5s infinite; box-shadow: 0 0 10px orange; }
+
+        /* Dodge Logic */
+        .btn-container { position: relative; height: 120px; width: 100%; margin-top: 20px; display: flex; justify-content: center; align-items: center; }
+        .dodge-btn { position: absolute; background: var(--pink); color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; z-index: 100; transition: 0.1s; font-weight: bold; }
+        .fixed { position: static !important; background: #4caf50 !important; transform: none !important; }
+
+        /* Quiz */
+        .quiz-btn { display: block; width: 100%; padding: 12px; margin: 10px 0; background: #eee; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .quiz-btn:hover { background: var(--pink); color: white; }
+
+        /* Gallery */
+        .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; width: 100%; }
+        .polaroid { background: white; padding: 8px 8px 25px 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; color: #333; }
+        .polaroid img { width: 100%; height: 120px; object-fit: cover; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: white; color: #333; padding: 25px; border-radius: 15px; text-align: center; width: 100%; max-width: 400px; }
+        
+        button.primary { background: var(--pink); color: white; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 50% { transform: scale(1.3); } }
+        @keyframes flicker { 50% { opacity: 0.7; } }
+    </style>
+</head>
+<body>
+
+    <div class="hearts-sidebar"><span>❤️</span><span>💖</span><span>❤️</span><span>💗</span><span>❤️</span></div>
+
+    <div id="sec-timer" class="section active">
+        <h1>Wait for the magic... ✨</h1>
+        <div id="timer">
+            <div class="t-box"><span id="days">00</span>D</div>
+            <div class="t-box"><span id="hours">00</span>H</div>
+            <div class="t-box"><span id="mins">00</span>M</div>
+            <div class="t-box"><span id="secs">00</span>S</div>
+        </div>
+    </div>
+
+    <div id="sec-cake" class="section">
+        <h1>Wish you very Happy Birthday my dear Tanishkaaa!
+            Let's cut the cake and celebrate! yeaahh!! 🎂</h1>
+        <div class="cake-wrap" onclick="cutCake()">
+            <div class="flame"></div>
+            <div class="tier t2"></div>
+            <div class="tier t1"></div>
+        </div>
+        <p>Come let's cut it together!! </p>
+    </div>
+
+    <div id="sec-tease" class="section">
+        <div class="card">
+            <h2>An important Question first!! 💌</h2>
+            <p>You wanna go ahead to see what's there next?? 👉👈🙄
+            </p>
+            <div class="btn-container">
+                <button id="tease-yes" class="dodge-btn" onmouseover="dodge('tease-yes', 'teaseUnlocked')" onclick="goLetter()">Yes!</button>
+                <button style="background:#ddd; margin-left: 100px; border:none; padding:10px 20px; border-radius:8px;">No</button>
+            </div>
+            <p id="tease-status" style="font-size: 0.8rem; color: #999; margin-top: 10px;">(Unlocks in 15s)</p>
+        </div>
+    </div>
+
+    <div id="sec-letter" class="section">
+        <div class="card">
+            <h2 style="color: var(--pink);">To my Sweetheart, Kuchupuchu, Rasmalai...💌</h2>
+            <p style="font-style: italic; line-height: 1.6;">"First of all Happy Birthday to youu! ✨ You mean so much to me. I hope this small effort brings wide smile to your face. 😊 You deserve all the love, care and kisses! 
+                The day which you were waiting for has finally arrived and now 😍 it's time to celebrate, although you're having chem exam tomorrow but take some time out to celebrate your 18th bday! 🙄 The moment comes once in life so have fun!
+                You really mean so much to me nd I loveee youuu with all my heart! 💕 I just want to say that you mean so much to me and I can't afford to loose you!! Don't get emotional as I'm not with you to wipe your tears and to hug you!!
+                Just keep smiling stay healty and wealthy my dear love!! ❤️ I lovee youu!! 😘
+                "</p>
+            <button class="primary" onclick="switchSection('sec-quiz')">Next! 😏 →</button>
+        </div>
+    </div>
+
+    <div id="sec-quiz" class="section">
+        <div class="card">
+            <h2 id="q-title">A Question again!! 🤔</h2>
+            <p id="q-text">Do You loveee meeee?? 👉👈🙄</p>
+            <div id="q-options">
+                <button class="quiz-btn" onclick="nextQuiz()">yeh bhi koi puchne ki baat hai?? Yes I lovee you soo muchh!! 😍</button>
+                <button class="quiz-btn" onclick="nextQuiz()">Obviously yrr! No doubt!! I loveee youuu 😌 ✨</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-gallery" class="section" style="max-width: 600px;">
+        <div class="card">
+            <h2 style="color: var(--pink);">A Small yet beautiful gallery!!  🎁</h2>
+            <div class="gallery">
+                <div class="polaroid" onclick="openPhoto(1)"><img src="photo1.png"><p>Pic 1</p></div>
+                <div class="polaroid" onclick="openPhoto(2)"><img src="photo2.png"><p>Pic 2</p></div>
+                <div class="polaroid" onclick="openPhoto(3)"><img src="photo3.png"><p>Pic 3</p></div>
+                <div class="polaroid" onclick="openPhoto(4)"><img src="photo4.png"><p>Pic 4</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <img id="modalImg" src="" style="width:100%; border-radius:10px; margin-bottom: 10px;">
+            <div id="mini-game-ui">
+                <p>Unlock the message?</p>
+                <div class="btn-container" style="height: 80px;">
+                    <button id="mini-yes" class="dodge-btn" onmouseover="dodge('mini-yes', 'miniUnlocked')" onclick="revealMsg()">Yes!</button>
+                    <button onclick="closeModal()" style="background:#ddd; border:none; padding:10px 20px; border-radius:8px; margin-left: 80px;">No</button>
+                </div>
+            </div>
+            <div id="msg-ui" style="display:none; margin-top: 15px;">
+                <p id="final-msg" style="color: var(--pink); font-weight: bold; font-style: italic;"></p>
+                <button class="primary" onclick="closeModal()">Back to Gallery</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let teaseUnlocked = false;
+        let miniUnlocked = false;
+        let quizStep = 1;
+        let currentPhoto = 1;
+
+        const messages = { 
+            1: "Dekh teri bachpan ki pic hai! Isko lagana to banta he hai!😏 This pic will surely remind you how much you've grown and how far you've come! The innocence and cuteness filled with mischeif is what a kid in the childhood need defines of you!! ❤️ ✨", 
+            2: "Desi nd ethnic look which makes my jaw drop in awww to wonder ur beauty. 😍 I hope kisi ki nazar naa lage 🧿 aur tu aur sundar ho jaye aur mere dil ke kareeb rahe! 🌸", 
+            3: "Best memory ever! 💖 Maine jab ye phool ko ek phool ke uper lagaye the vo moment mera fav hai!! Aise he muskurate raho!! Wo pyaar jo hum dono ko jode rakhta hai vo humare beech bana rahe aur kisi ki nazar naa lage!!  ", 
+            4: "Yeh humari ek pic! 😍 Isme tu height match krne ke liye khadi hai 🤣🤣. Uss din bhot acha laga milkr.. Hum aise he saath haste rahe muskurate rahe! Once again Happy Bday Tanishka and I lovee youuu so muchh!!" 
+        };
+
+        // Timer
+        const bday = new Date("Jan 4, 2026 00:00:00").getTime();
+        const countdown = setInterval(() => {
+            const diff = bday - new Date().getTime();
+            document.getElementById("days").innerText = Math.floor(diff/86400000);
+            document.getElementById("hours").innerText = Math.floor((diff%86400000)/3600000);
+            document.getElementById("mins").innerText = Math.floor((diff%3600000)/60000);
+            document.getElementById("secs").innerText = Math.floor((diff%60000)/1000);
+            if(diff < 0) { clearInterval(countdown); switchSection('sec-cake'); }
+        }, 1000);
+
+        function switchSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo(0,0);
+            if(id === 'sec-tease') {
+                setTimeout(() => {
+                    teaseUnlocked = true;
+                    document.getElementById('tease-yes').classList.add('fixed');
+                    document.getElementById('tease-status').innerText = "Unlocked! Click Yes.";
+                }, 15000);
+            }
+        }
+
+        function cutCake() { confetti(); setTimeout(() => switchSection('sec-tease'), 1000); }
+
+        function dodge(id, flag) {
+            if(window[flag]) return;
+            const btn = document.getElementById(id);
+            btn.style.left = Math.random()*70 + '%';
+            btn.style.top = Math.random()*70 + '%';
+        }
+
+        function goLetter() { if(teaseUnlocked) switchSection('sec-letter'); }
+
+        function nextQuiz() {
+            if(quizStep === 1) {
+                document.getElementById('q-text').innerText = "Ready to see our memories?";
+                document.getElementById('q-options').innerHTML = `<button class="primary" onclick="switchSection('sec-gallery')">YES, SHOW ME! 😍</button>`;
+            }
+        }
+
+        function openPhoto(id) {
+            currentPhoto = id; miniUnlocked = false;
+            document.getElementById('modalImg').src = `photo${id}.png`;
+            document.getElementById('msg-ui').style.display = 'none';
+            document.getElementById('mini-game-ui').style.display = 'block';
+            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('mini-yes').classList.remove('fixed');
+            setTimeout(() => { miniUnlocked = true; document.getElementById('mini-yes').classList.add('fixed'); }, 3000);
+        }
+
+        function revealMsg() {
+            if(!miniUnlocked) return;
+            document.getElementById('mini-game-ui').style.display = 'none';
+            document.getElementById('final-msg').innerText = messages[currentPhoto];
+            document.getElementById('msg-ui').style.display = 'block';
+            confetti({ particleCount: 100 });
+        }
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    </script>
+</body>
+</html>
